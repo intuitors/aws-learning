@@ -1,0 +1,704 @@
+<!-- START OF FILE index.html -->
+
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS VPC Exam Prep App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #ff9900;
+        }
+        .learning-section {
+            margin-bottom: 30px;
+        }
+        .learning-section h2 {
+            font-size: 1.4em;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+        .concept-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .concept-header {
+            background: #f8f9fa;
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .concept-header:hover {
+            background: #e9ecef;
+        }
+        .concept-content {
+            padding: 15px;
+            display: none;
+            background: #fff;
+        }
+        .concept-content p {
+            margin: 0 0 10px;
+        }
+        .concept-content strong {
+            color: #155724;
+        }
+        .progress {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .progress-bar {
+            width: 100%;
+            background: #ddd;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #28a745;
+            width: 0;
+            transition: width 0.3s;
+        }
+        .question {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            padding: 12px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .option:hover {
+            background: #e9ecef;
+        }
+        .option.selected {
+            background: #007bff;
+            color: #fff;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.95em;
+        }
+        .correct {
+            background: #d4edda;
+            color: #155724;
+        }
+        .incorrect {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            padding: 10px 20px;
+            background: #ff9900;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 10px auto;
+            font-size: 1em;
+        }
+        button:hover {
+            background: #e68a00;
+        }
+        .restart {
+            background: #dc3545;
+        }
+        .restart:hover {
+            background: #c82333;
+        }
+        .history {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .history h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .history ul {
+            list-style: none;
+            padding: 0;
+        }
+        .history li {
+            padding: 5px 0;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            button {
+                width: 100%;
+            }
+            .question {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AWS VPC Exam Prep App</h1>
+        <div class="learning-section">
+            <h2>Learn AWS VPC Concepts</h2>
+            <div class="concept-card">
+                <div class="concept-header">VPC Fundamentals<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>What is a VPC?</strong> A Virtual Private Cloud (VPC) is an isolated virtual network in AWS where you can launch resources like EC2 instances. You define its IP range (CIDR block), subnets, and tenancy (default or dedicated).</p>
+                    <p><strong>Use Case:</strong> Hosting a web application with public and private subnets for secure resource placement.</p>
+                    <p><strong>Exam Tip:</strong> Know how to choose CIDR blocks (e.g., 10.0.0.0/16) and understand the difference between default and custom VPCs. Default VPCs are pre-configured for ease of use.</p>
+                </div>
+            </div>
+            <div class="concept-card">
+                <div class="concept-header">Subnets and Routing<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>What are Subnets?</strong> Subnets divide a VPC’s IP range into smaller segments, each in one Availability Zone. Public subnets have routes to an Internet Gateway; private subnets do not.</p>
+                    <p><strong>Routing:</strong> Route tables control traffic, directing 0.0.0.0/0 to Internet Gateways, NAT Gateways, or other targets.</p>
+                    <p><strong>Use Case:</strong> Deploying EC2 instances in private subnets with a NAT Gateway for outbound internet access, while web servers are in public subnets.</p>
+                    <p><strong>Exam Tip:</strong> Understand public vs. private subnets and how to configure route tables for high availability across Availability Zones. Each subnet must be associated with a route table.</p>
+                </div>
+            </div>
+            <div class="concept-card">
+                <div class="concept-header">Security Groups and Network ACLs<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>Security Groups (SGs):</strong> Stateful firewalls at the ENI/instance level. They allow traffic based on rules (e.g., allow HTTP on port 80). All outbound traffic is allowed by default. Deny rules are not supported (implicit deny).</p>
+                    <p><strong>Network ACLs (NACLs):</strong> Stateless firewalls at the subnet level. They require explicit inbound and outbound rules (allow or deny). Rules are evaluated in order by number.</p>
+                    <p><strong>Use Case:</strong> SGs for fine-grained instance access control (e.g., web server allows port 80/443). NACLs for broader subnet-level defense (e.g., blocking known malicious IPs).</p>
+                    <p><strong>Exam Tip:</strong> Key difference: SGs are stateful (return traffic automatically allowed), NACLs are stateless (return traffic must be explicitly allowed). SGs apply to instances, NACLs to subnets.</p>
+                </div>
+            </div>
+            <div class="concept-card">
+                <div class="concept-header">Internet Gateways (IGW)<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>What is it?</strong> A horizontally scaled, redundant, and highly available VPC component that allows communication between your VPC and the internet. It's not tied to a specific Availability Zone.</p>
+                    <p><strong>Use Case:</strong> Enabling EC2 instances in public subnets to be directly reachable from the internet and to initiate outbound internet connections. Required for NAT Gateways.</p>
+                    <p><strong>Exam Tip:</strong> A VPC can only have one IGW attached. A public subnet must have a route to an IGW (e.g., 0.0.0.0/0 -> IGW ID) in its associated route table. Instances in public subnets also need a public IP or Elastic IP.</p>
+                </div>
+            </div>
+             <div class="concept-card">
+                <div class="concept-header">NAT Gateways and NAT Instances<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>NAT Gateway:</strong> AWS-managed service providing outbound internet connectivity for instances in private subnets. Highly available within an AZ, place one in each AZ for redundancy. Requires an Elastic IP.</p>
+                    <p><strong>NAT Instance:</strong> An EC2 instance in a public subnet configured to perform NAT. Requires manual management (patching, scaling, HA setup). Can be a bastion host too.</p>
+                    <p><strong>Use Case:</strong>
+                        <strong>NAT Gateway:</strong> For private subnet instances to download updates or access public APIs without being directly exposed to the internet.
+                        <strong>NAT Instance:</strong> Older approach, or if specific customizations (e.g., advanced monitoring, port forwarding) are needed beyond NAT Gateway features.
+                    </p>
+                    <p><strong>Exam Tip:</strong> Prefer NAT Gateways for high availability, scalability, and reduced operational overhead. NAT Instances can be a single point of failure unless you implement custom HA.</p>
+                </div>
+            </div>
+            <div class="concept-card">
+                <div class="concept-header">Route Tables In-Depth<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>What is it?</strong> A set of rules, called routes, that determine where network traffic from your subnet or gateway is directed. Each VPC has a main route table (default for subnets not explicitly associated with another). You can create custom route tables.</p>
+                    <p><strong>Key Components:</strong> Destination (CIDR block), Target (e.g., IGW, VPG, NAT Gateway, Peering Connection, ENI, VPC Endpoint).</p>
+                    <p><strong>Use Case:</strong> Directing internet-bound traffic (0.0.0.0/0) from public subnets to an IGW. Directing internet-bound traffic from private subnets to a NAT Gateway. Routing traffic between peered VPCs.</p>
+                    <p><strong>Exam Tip:</strong> Understand route priority: the most specific route matching the traffic's destination always wins. Subnets can only be associated with one route table at a time. The main route table can be modified but not deleted.</p>
+                </div>
+            </div>
+            <div class="concept-card">
+                <div class="concept-header">VPC Peering and Endpoints<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>VPC Peering:</strong> Connects two VPCs (same or different regions/accounts) for private communication using private IP addresses, as if they are on the same network. Non-transitive. Requires route table updates in both VPCs.</p>
+                    <p><strong>VPC Endpoints:</strong>
+                        <strong>Gateway Endpoints:</strong> For S3 and DynamoDB. A gateway specified as a target in your route table. No ENI, no additional cost.
+                        <strong>Interface Endpoints (AWS PrivateLink):</strong> For many other AWS services (e.g., Kinesis, EC2 API, KMS) and custom services. Uses an Elastic Network Interface (ENI) in your subnet with a private IP. Incurs cost.
+                    </p>
+                    <p><strong>Use Case:</strong> Peering for inter-VPC application communication. Endpoints for accessing AWS services privately without internet traversal.</p>
+                    <p><strong>Exam Tip:</strong> Peering is not transitive (A-B, B-C doesn't mean A-C). Overlapping CIDRs are not allowed for peering. Know when to use Gateway vs. Interface Endpoints (S3/DynamoDB vs. others).</p>
+                </div>
+            </div>
+            <div class="concept-card">
+                <div class="concept-header">Site-to-Site VPN and Connectivity<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>Site-to-Site VPN:</strong> Connects an on-premises network to a VPC using an IPsec encrypted tunnel. Requires a Virtual Private Gateway (VGW) on the AWS side and a Customer Gateway (CGW) on your on-premises side. Supports BGP (dynamic) or static routing.</p>
+                    <p><strong>AWS Direct Connect (DX):</strong> Dedicated private network connection from on-premises to AWS. Higher bandwidth, lower latency, more consistent than VPN. Can be partitioned into Virtual Interfaces (VIFs).</p>
+                    <p><strong>Transit Gateway (TGW):</strong> Network hub that simplifies connectivity between multiple VPCs and on-premises networks. Acts as a cloud router. Supports transitive routing.</p>
+                    <p><strong>Use Case:</strong> VPN for secure, moderate bandwidth to on-premises. DX for high-bandwidth, stable connections. TGW for scaling connectivity across many VPCs/on-prem locations.</p>
+                    <p><strong>Exam Tip:</strong> Understand VGW vs CGW roles. BGP is preferred for dynamic route propagation in VPNs. DX provides dedicated bandwidth but is not encrypted by default (can be combined with VPN for encryption). TGW simplifies complex network topologies.</p>
+                </div>
+            </div>
+             <div class="concept-card">
+                <div class="concept-header">Elastic IP Addresses (EIPs)<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>What is it?</strong> Static, public IPv4 addresses designed for dynamic cloud computing. You can allocate an EIP to your account and associate it with an EC2 instance, network interface, or NAT Gateway.</p>
+                    <p><strong>Use Case:</strong> Providing a fixed, reliable public IP address for a web server, NAT Gateway, or other internet-facing resource. If an instance fails, the EIP can be quickly remapped to a replacement instance.</p>
+                    <p><strong>Exam Tip:</strong> EIPs are free when associated with a *running* EC2 instance and have only one EIP associated with it. You are charged for EIPs not associated with a running instance, associated with a stopped instance, or if an instance has multiple EIPs. EIPs are regional resources.</p>
+                </div>
+            </div>
+            <div class="concept-card">
+                <div class="concept-header">VPC Flow Logs<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>What is it?</strong> A feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. Flow log data can be published to Amazon CloudWatch Logs or Amazon S3.</p>
+                    <p><strong>Captured Information:</strong> Source/destination IP, source/destination ports, protocol, packets, bytes, start/end time, action (ACCEPT/REJECT), log status.</p>
+                    <p><strong>Use Case:</strong> Monitoring network traffic, troubleshooting connectivity issues (e.g., security group or NACL rule problems), security analysis (detecting anomalous traffic), compliance.</p>
+                    <p><strong>Exam Tip:</strong> Flow Logs do *not* capture all traffic (e.g., DNS queries to AmazonProvidedDNS, traffic to instance metadata service, DHCP traffic, traffic to the default VPC router). They operate at the ENI level. You cannot tag flow logs.</p>
+                </div>
+            </div>
+            <div class="concept-card">
+                <div class="concept-header">DNS in VPC<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>AmazonProvidedDNS:</strong> AWS DNS server (typically at VPC_CIDR_base + 2, e.g., 10.0.0.2 for a 10.0.0.0/16 VPC). Resolves public DNS hostnames and private DNS hostnames for EC2 instances within the VPC (if enabled).</p>
+                    <p><strong>VPC Attributes for DNS:</strong>
+                        <code>enableDnsSupport</code>: (Default: true) If true, queries to AmazonProvidedDNS succeed.
+                        <code>enableDnsHostnames</code>: (Default: false for custom VPCs, true for default VPCs) If true, instances with public IPs get public DNS hostnames.
+                    </p>
+                    <p><strong>Route 53 Resolver:</strong> Provides DNS resolution for VPCs and on-premises networks (hybrid DNS). Can create inbound/outbound endpoints to forward DNS queries between VPC and on-prem networks.</p>
+                    <p><strong>Use Case:</strong> EC2 instances resolving public domain names or names of other instances. Hybrid cloud DNS resolution. Custom domain names for internal resources with Route 53 private hosted zones.</p>
+                    <p><strong>Exam Tip:</strong> Both <code>enableDnsSupport</code> and <code>enableDnsHostnames</code> must be true for instances to get public DNS hostnames that resolve to their public IPs. Understand the role of DHCP Option Sets in configuring DNS servers for a VPC.</p>
+                </div>
+            </div>
+            <div class="concept-card">
+                <div class="concept-header">VPC Sharing<span>▼</span></div>
+                <div class="concept-content">
+                    <p><strong>What is it?</strong> Allows multiple AWS accounts within the same AWS Organization to create their application resources (like EC2 instances, RDS databases, Redshift clusters) into shared, centrally managed VPCs. The VPC owner account shares one or more subnets with participant accounts.</p>
+                    <p><strong>Roles:</strong>
+                        <strong>Owner:</strong> Owns the VPC and its resources (subnets, route tables, gateways). Shares subnets.
+                        <strong>Participant:</strong> Can launch resources into shared subnets. Can view shared resources.
+                    </p>
+                    <p><strong>Use Case:</strong> Centralized network management, cost optimization by sharing network infrastructure, separation of billing and resource ownership at the account level while using a common network.</p>
+                    <p><strong>Exam Tip:</strong> Participants cannot modify the VPC structure (e.g., route tables, NACLs, VPC CIDRs). Security Groups can be referenced across accounts in a shared VPC scenario if peered, but generally SGs are managed by the account launching the resource. VPC sharing does not work across regions.</p>
+                </div>
+            </div>
+        </div>
+        <div class="progress">
+            <p>Progress: <span id="progress-text">0%</span></p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+        <div id="quiz">
+            <div class="question" id="question-text"></div>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <button id="submit">Submit Answer</button>
+            <button id="next" style="display: none;">Next Question</button>
+        </div>
+        <button id="restart" class="restart" style="display: none;">Restart Quiz</button>
+        <div class="history" id="history">
+            <h2>Quiz History</h2>
+            <ul id="history-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "A company needs to establish a secure connection between its on-premises data center and an AWS VPC to enable seamless access to resources. The connection must be encrypted and support dynamic routing protocols. Which configuration should a solutions architect implement to meet these requirements?",
+                options: [
+                    "Configure a Virtual Private Gateway, a Customer Gateway, and a Site-to-Site VPN connection with static routing.",
+                    "Set up an AWS Direct Connect link with a private virtual interface and enable BGP routing.",
+                    "Create a Transit Gateway, attach the VPC, and configure a Site-to-Site VPN with dynamic routing.",
+                    "Configure a Virtual Private Gateway, a Customer Gateway, and a Site-to-Site VPN connection with BGP routing."
+                ],
+                correct: 3,
+                explanation: "A Site-to-Site VPN with a Virtual Private Gateway (attached to the VPC), a Customer Gateway (representing the on-premises network), and a VPN connection using BGP routing meets the requirements for an encrypted connection supporting dynamic routing protocols. Static routing (A) doesn’t support dynamic protocols. Direct Connect (B) is a dedicated network, not inherently encrypted for transit to VPC, and while it supports BGP, the primary requirement is VPN. Transit Gateway (C) is for multi-VPC setups or complex routing, but the core VPN components are still needed."
+            },
+            {
+                question: "A solutions architect is designing a VPC for a web application that requires high availability. The application consists of EC2 instances in an Auto Scaling group and an Amazon RDS database. Which VPC configuration ensures high availability across multiple Availability Zones?",
+                options: [
+                    "Create one public subnet and one private subnet in a single Availability Zone, with an Internet Gateway for public access.",
+                    "Create two public subnets and two private subnets across two Availability Zones, with a NAT Gateway in each public subnet for the private subnets.",
+                    "Create a single subnet spanning multiple Availability Zones and attach a Virtual Private Gateway for connectivity.",
+                    "Create two public subnets in one Availability Zone and two private subnets in another, with a single NAT Gateway."
+                ],
+                correct: 1,
+                explanation: "High availability requires deploying across multiple Availability Zones. Two public subnets (for web servers) and two private subnets (for RDS and potentially app tiers) across two AZs, with redundant NAT Gateways (one in each AZ's public subnet) for outbound internet access from private subnets, ensures HA. Option A lacks multi-AZ. Option C is invalid; subnets cannot span AZs. Option D creates a single point of failure for NAT Gateway and doesn't distribute subnets effectively for HA of all tiers."
+            },
+            {
+                question: "A company is hosting a web application in a VPC with EC2 instances in a public subnet. The solutions architect needs to allow HTTP traffic from the internet while blocking all other inbound traffic. Which configuration achieves this with the least administrative overhead?",
+                options: [
+                    "Configure a Network ACL to allow inbound HTTP traffic on port 80 and deny all other inbound traffic.",
+                    "Configure a Security Group to allow inbound HTTP traffic on port 80 from 0.0.0.0/0 and associate it with the EC2 instances.",
+                    "Create a VPC Endpoint for HTTP traffic and restrict access using IAM policies.",
+                    "Configure a Network ACL to allow all inbound traffic and a Security Group to deny non-HTTP traffic."
+                ],
+                correct: 1,
+                explanation: "Security Groups are stateful and manage traffic at the instance level. Allowing inbound HTTP on port 80 from 0.0.0.0/0 in a Security Group meets the requirement, implicitly denying other traffic (as SGs are default deny for inbound). Network ACLs (A, D) are stateless and require explicit allow/deny rules for both inbound and outbound, adding complexity. VPC Endpoints (C) are for private access to AWS services, not general HTTP traffic from the internet."
+            },
+            {
+                question: "A company has two VPCs in the same AWS account and region: VPC-A hosts an application, and VPC-B hosts a database. The application in VPC-A needs to access the database in VPC-B securely using private IP addresses. What is the most cost-effective solution?",
+                options: [
+                    "Configure a Site-to-Site VPN between VPC-A and VPC-B.",
+                    "Set up VPC Peering between VPC-A and VPC-B and update route tables.",
+                    "Use an AWS Transit Gateway to connect VPC-A and VPC-B.",
+                    "Create a NAT Gateway in VPC-A to route traffic to VPC-B."
+                ],
+                correct: 1,
+                explanation: "VPC Peering is the most cost-effective way to connect two VPCs in the same region and account, enabling private communication via route table updates. Site-to-Site VPN (A) adds unnecessary encryption overhead and cost for intra-region, same-account VPCs. Transit Gateway (C) is more expensive and typically used for more complex, multi-VPC/on-prem setups. NAT Gateways (D) are for outbound internet access from private subnets, not inter-VPC communication."
+            },
+            {
+                question: "A solutions architect is designing a VPC with EC2 instances in a private subnet that need to access an Amazon S3 bucket for data retrieval. The company requires that traffic to S3 does not traverse the internet for security reasons. What is the best solution to meet this requirement?",
+                options: [
+                    "Configure a NAT Gateway in a public subnet and update the route table to route S3 traffic.",
+                    "Create a Gateway VPC Endpoint for S3 and update the route table to route S3 traffic to the endpoint.",
+                    "Set up an Interface VPC Endpoint for S3 and configure security group rules.",
+                    "Use a Site-to-Site VPN to connect the private subnet to S3."
+                ],
+                correct: 1,
+                explanation: "A Gateway VPC Endpoint for S3 enables private subnet instances to access S3 without internet traversal, by adding a route in the route table that directs S3 traffic to the endpoint. NAT Gateways (A) route traffic to the internet. Interface Endpoints (C) are available for S3 but Gateway Endpoints are generally preferred for S3 due to cost (Gateway Endpoints are free) and simplicity for this use case. Site-to-Site VPN (D) is for on-premises connectivity."
+            },
+            {
+                question: "A company requires instances in a private subnet to access the internet for software updates. The solution must be highly available and require minimal management overhead. Which approach should be used?",
+                options: [
+                    "Deploy a NAT Instance in a public subnet and configure route tables.",
+                    "Deploy a NAT Gateway in a public subnet and configure route tables.",
+                    "Configure an Egress-Only Internet Gateway for the private subnet.",
+                    "Attach an Internet Gateway directly to the private subnet."
+                ],
+                correct: 1,
+                explanation: "NAT Gateways are AWS-managed, highly available within an Availability Zone, and scalable, requiring minimal management. For cross-AZ HA, deploy a NAT Gateway in each AZ. NAT Instances require manual management for HA and scaling. Egress-Only Internet Gateways are for IPv6 outbound traffic. Internet Gateways cannot be directly used by private subnets for internet access; they make subnets public."
+            },
+            {
+                question: "A security team needs to audit all accepted and rejected TCP/IP traffic for specific EC2 instances in a VPC. Which AWS service should they use to capture this information?",
+                options: [
+                    "AWS CloudTrail",
+                    "Amazon CloudWatch Alarms",
+                    "VPC Flow Logs",
+                    "AWS Config"
+                ],
+                correct: 2,
+                explanation: "VPC Flow Logs capture information about IP traffic going to and from network interfaces in your VPC, including source/destination IPs, ports, protocol, and action (ACCEPT/REJECT). CloudTrail logs API calls. CloudWatch Alarms monitor metrics. AWS Config tracks resource configuration changes."
+            },
+            {
+                question: "A company hosts a critical web application on an EC2 instance. They need a static public IP address for the application that persists even if the instance is stopped, restarted, or replaced. What should they use?",
+                options: [
+                    "The instance's default public IP assigned on launch.",
+                    "Configure auto-assign public IP for the subnet.",
+                    "Allocate and associate an Elastic IP Address (EIP).",
+                    "Use a DNS CNAME record pointing to the instance's dynamic public IP."
+                ],
+                correct: 2,
+                explanation: "Elastic IP Addresses (EIPs) provide a static public IPv4 address that can be associated with an EC2 instance or network interface. It persists independently of the instance's lifecycle. Default public IPs and auto-assigned public IPs change if the instance is stopped/started. A CNAME record still points to an IP that might change."
+            },
+            {
+                question: "A new subnet is created in a custom VPC. No custom route table is explicitly associated with this subnet during its creation. Where will the traffic from instances in this new subnet be routed by default?",
+                options: [
+                    "Directly to the Internet Gateway attached to the VPC.",
+                    "According to the rules in the main route table of the VPC.",
+                    "No traffic will be routed out of the subnet until a route table is associated.",
+                    "To the oldest custom route table created in the VPC."
+                ],
+                correct: 1,
+                explanation: "If a subnet is not explicitly associated with a specific route table, it automatically uses the VPC's main route table. The main route table initially only contains a local route for traffic within the VPC."
+            },
+            {
+                question: "A solutions architect wants EC2 instances launched in a custom VPC to automatically receive public DNS hostnames that resolve to their public IP addresses. The instances are launched in a public subnet and have public IPs. Which VPC attribute(s) must be enabled?",
+                options: [
+                    "`enableDnsSupport` only",
+                    "`enableDnsHostnames` only",
+                    "Both `enableDnsSupport` and `enableDnsHostnames`",
+                    "`enableClassicLinkDnsSupport` and `enableDnsHostnames`"
+                ],
+                correct: 2,
+                explanation: "`enableDnsSupport` (true by default) ensures that the Amazon-provided DNS server can resolve DNS hostnames. `enableDnsHostnames` (false by default for custom VPCs) determines if instances with public IP addresses receive corresponding public DNS hostnames. Both must be true for this scenario."
+            },
+            {
+                question: "An organization uses VPC sharing. Account A (owner) owns the VPC and shares a subnet with Account B (participant). What action can Account B perform within the shared subnet?",
+                options: [
+                    "Modify the route table associated with the shared subnet.",
+                    "Launch EC2 instances, RDS instances, and other application resources into the shared subnet.",
+                    "Change the CIDR block of the shared subnet.",
+                    "Delete the shared subnet from their account's view."
+                ],
+                correct: 1,
+                explanation: "Participant accounts in a VPC sharing setup can launch their application resources (like EC2 instances, RDS databases) into the subnets shared with them by the owner account. They cannot manage the VPC's network infrastructure, such as modifying route tables, NACLs, or CIDR blocks, nor can they delete the shared resources owned by another account."
+            },
+            {
+                question: "When configuring network security for EC2 instances, a key difference between Security Groups (SGs) and Network ACLs (NACLs) is their statefulness. Which statement accurately describes this?",
+                options: [
+                    "SGs are stateless, requiring explicit outbound rules for return traffic; NACLs are stateful.",
+                    "Both SGs and NACLs are stateless, requiring explicit rules for all traffic.",
+                    "SGs are stateful, automatically allowing return traffic for allowed inbound connections; NACLs are stateless, requiring explicit inbound and outbound rules.",
+                    "Both SGs and NACLs are stateful, automatically allowing return traffic."
+                ],
+                correct: 2,
+                explanation: "Security Groups are stateful. If you allow an inbound connection on a specific port, the return traffic for that connection is automatically allowed, regardless of outbound rules. Network ACLs are stateless; you must explicitly define rules for both inbound and outbound traffic, including return traffic."
+            },
+            {
+                question: "A company has peered VPC A with VPC B, and VPC B is also peered with VPC C. Instances in VPC A need to communicate with instances in VPC C using private IPs. How can this be achieved assuming no Transit Gateway is used?",
+                options: [
+                    "Traffic will automatically route from VPC A to VPC C because peering is transitive.",
+                    "A new VPC peering connection must be established directly between VPC A and VPC C, and route tables updated accordingly.",
+                    "Configure VPC B's route tables to forward traffic between VPC A and VPC C.",
+                    "This scenario is not possible with VPC peering; an Internet Gateway must be used."
+                ],
+                correct: 1,
+                explanation: "VPC peering is non-transitive. This means that if VPC A is peered with VPC B, and VPC B is peered with VPC C, there is no direct path between VPC A and VPC C through VPC B. To enable communication between VPC A and VPC C, a separate, direct VPC peering connection must be established between them, and their respective route tables updated."
+            },
+            {
+                question: "An application running on EC2 instances in a private subnet needs to access AWS Systems Manager (SSM) APIs securely, without traffic traversing the internet. Which AWS networking component should be configured?",
+                options: [
+                    "A NAT Gateway in a public subnet.",
+                    "A VPC Gateway Endpoint for SSM.",
+                    "An Interface VPC Endpoint (AWS PrivateLink) for SSM.",
+                    "An Internet Gateway attached to the private subnet."
+                ],
+                correct: 2,
+                explanation: "AWS PrivateLink, through Interface VPC Endpoints, allows private and secure connectivity to AWS services like SSM, EC2 APIs, Kinesis, etc., from within your VPC without needing an Internet Gateway, NAT device, VPN, or Direct Connect. Interface Endpoints create an ENI in your subnet with a private IP. Gateway Endpoints are only for S3 and DynamoDB. SSM is not one of them."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+        let quizHistory = JSON.parse(localStorage.getItem('awsVPCQuizHistory')) || [];
+
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options');
+        const feedback = document.getElementById('feedback');
+        const submitButton = document.getElementById('submit');
+        const nextButton = document.getElementById('next');
+        const restartButton = document.getElementById('restart');
+        const progressText = document.getElementById('progress-text');
+        const progressFill = document.getElementById('progress-fill');
+        const historyList = document.getElementById('history-list');
+
+        // Learning Section: Toggle concept cards
+        document.querySelectorAll('.concept-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                const isVisible = content.style.display === 'block';
+                content.style.display = isVisible ? 'none' : 'block';
+                header.querySelector('span').textContent = isVisible ? '▼' : '▲';
+            });
+        });
+
+        function loadQuestion() {
+            answered = false; // Reset answered state for the new question
+            window.selectedOption = undefined; // Reset selected option
+
+            const q = questions[currentQuestion];
+            questionText.textContent = q.question;
+            optionsContainer.innerHTML = '';
+            q.options.forEach((option, index) => {
+                const div = document.createElement('div');
+                div.classList.add('option');
+                div.textContent = option;
+                div.addEventListener('click', () => selectOption(index, div));
+                optionsContainer.appendChild(div);
+            });
+            feedback.style.display = 'none';
+            feedback.className = 'feedback'; // Reset feedback classes
+            submitButton.style.display = 'block';
+            nextButton.style.display = 'none';
+            updateProgress();
+        }
+
+        function selectOption(index, element) {
+            if (answered) return;
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            window.selectedOption = index;
+        }
+
+        function submitAnswer() {
+            if (window.selectedOption === undefined) {
+                 // Optionally, provide feedback if no option is selected
+                alert("Please select an answer before submitting.");
+                return;
+            }
+            if (answered) return;
+
+            answered = true;
+            const q = questions[currentQuestion];
+            feedback.style.display = 'block';
+            if (window.selectedOption === q.correct) {
+                feedback.classList.add('correct');
+                feedback.textContent = 'Correct! ' + q.explanation;
+                score++;
+            } else {
+                feedback.classList.add('incorrect');
+                feedback.textContent = 'Incorrect. The correct answer was option ' + (q.correct + 1) + '. ' + q.explanation;
+                 // Highlight the correct answer
+                optionsContainer.children[q.correct].classList.add('correct');
+                // If a wrong answer was selected, mark it as incorrect
+                if (optionsContainer.children[window.selectedOption].classList.contains('selected')) {
+                     optionsContainer.children[window.selectedOption].classList.add('incorrect-selection'); // Custom class for wrong selection
+                }
+            }
+            submitButton.style.display = 'none';
+            nextButton.style.display = 'block';
+            saveProgress(); // Save progress after each answer
+        }
+        
+        // Add a simple style for incorrect-selection if needed
+        const styleSheet = document.createElement("style");
+        styleSheet.type = "text/css";
+        styleSheet.innerText = ".option.incorrect-selection { background-color: #f8d7da !important; color: #721c24 !important; border-color: #f5c6cb !important; } .option.correct { background-color: #d4edda !important; color: #155724 !important; border-color: #c3e6cb !important; }";
+        document.head.appendChild(styleSheet);
+
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                saveQuizHistory(); // Save history at the end of the quiz
+                showResults();
+            }
+        }
+
+        function showResults() {
+            questionText.textContent = `Quiz Completed! You scored ${score} out of ${questions.length}.`;
+            optionsContainer.innerHTML = '';
+            feedback.style.display = 'none';
+            submitButton.style.display = 'none';
+            nextButton.style.display = 'none';
+            restartButton.style.display = 'block';
+            progressText.textContent = `100%`;
+            progressFill.style.width = `100%`;
+            localStorage.removeItem('awsVPCQuizProgress'); // Clear progress once quiz is completed
+            updateHistory();
+        }
+
+        function updateProgress() {
+            const progressPercentage = (currentQuestion / questions.length) * 100;
+            progressText.textContent = `${Math.round(progressPercentage)}%`;
+            progressFill.style.width = `${progressPercentage}%`;
+        }
+
+        function saveProgress() {
+             // Only save if quiz is not yet completed
+            if (currentQuestion < questions.length) {
+                localStorage.setItem('awsVPCQuizProgress', JSON.stringify({
+                    currentQuestion,
+                    score,
+                    // Storing selected answers might be complex if you want to show them on reload
+                    // For now, just currentQuestion and score is fine for resuming
+                }));
+            }
+        }
+
+        function saveQuizHistory() {
+            const date = new Date().toLocaleString();
+            quizHistory.push({ date, score: `${score}/${questions.length}` });
+            if(quizHistory.length > 10) { // Keep only last 10 entries
+                quizHistory.shift();
+            }
+            localStorage.setItem('awsVPCQuizHistory', JSON.stringify(quizHistory));
+        }
+
+        function updateHistory() {
+            historyList.innerHTML = '';
+            // Display in reverse chronological order (most recent first)
+            [...quizHistory].reverse().forEach(entry => {
+                const li = document.createElement('li');
+                li.textContent = `${entry.date}: Score ${entry.score}`;
+                historyList.appendChild(li);
+            });
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('awsVPCQuizProgress');
+            if (saved) {
+                const { currentQuestion: savedQuestion, score: savedScore } = JSON.parse(saved);
+                // Check if the saved question index is valid
+                if (savedQuestion < questions.length) {
+                    currentQuestion = savedQuestion;
+                    score = savedScore;
+                    // It's tricky to restore the "answered" state and selected option perfectly
+                    // without more complex state saving. For now, we just load the question.
+                    // The user will have to re-answer the current question if they reload mid-question.
+                    loadQuestion();
+                } else {
+                    // If saved progress is beyond the last question, treat as completed
+                    showResults();
+                }
+            } else {
+                loadQuestion(); // Start fresh if no saved progress
+            }
+            updateHistory();
+        }
+
+        function restartQuiz() {
+            localStorage.removeItem('awsVPCQuizProgress');
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+            window.selectedOption = undefined;
+            restartButton.style.display = 'none';
+            submitButton.style.display = 'block'; // Ensure submit button is visible
+            loadQuestion();
+        }
+
+        submitButton.addEventListener('click', submitAnswer);
+        nextButton.addEventListener('click', nextQuestion);
+        restartButton.addEventListener('click', restartQuiz);
+
+        loadProgress(); // Load progress or start new quiz on page load
+    </script>
+</body>
+</html>
